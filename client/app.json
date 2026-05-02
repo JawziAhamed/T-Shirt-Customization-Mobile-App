@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Custom T-Shirt Studio",
+    "slug": "custom-tshirt-studio",
+    "scheme": "customtshirtstudio",
+    "version": "1.0.0",
+    "icon": "./src/assets/logo-tshirt.png",
+    "orientation": "portrait",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./src/assets/logo-tshirt.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#07111f"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/logo-tshirt.png",
+        "backgroundColor": "#07111f"
+      },
+      "package": "com.anonymous.customtshirtstudio"
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
+  }
+}
