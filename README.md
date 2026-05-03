@@ -8,7 +8,7 @@ https://github.com/JawziAhamed/T-Shirt-Customization-Mobile-App.git
 
 ## 02). Team Details
 
-**Group Number:** XX  
+**Group Number:** WE-IT-26 
 
 - **Member 1:** IT24103217 – Santhosh S – Inventory Management  
 - **Member 2:** IT24103822 – Wijesinghe K.B.W.C.P – Return & Refund + Complaints Management  
