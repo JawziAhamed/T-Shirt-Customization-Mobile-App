@@ -1,18 +1,15 @@
 # Customized T-Shirt Management System
-
-01). GitHub Repository Link 
-GitHub Repository: [https://github.com/your-repo-link ](https://github.com/JawziAhamed/T-Shirt-Customization-Mobile-App.git)
-02).Team Details 
-Group Number: XX 
-Member 1: ITxxxx – Name – Module   
-Member 2: ITxxxx – Name – Module   
-Member 3: ITxxxx – Name – Module   
-Member 4: ITxxxx – Name – Module   
-Member 5: ITxxxx – Name – Module   
-Member 6: ITxxxx – Name – Module   
-03). Deployment Details 
-Backend URL:[ https://your-api-link ](https://t-shirt-customization-mobile-app.onrender.com)
-
+01). GitHub Repository Link
+GitHub Repository:https://github.com/JawziAhamed/T-Shirt-Customization-Mobile-App.git
+02).Team Details
+Group Number: XX
+Member 1: IT24103217 – Santhosh S – Inventory Management
+Member 2: IT24103822 – Wijesinghe K.B.W.C.P – Return & Refund + Complaints Management
+Member 3: IT24103595 – Nazim H.M.B – Product Management
+Member 4: IT24102998 – Ahamed M.J.A.J – User Management
+Member 5: IT24102847 – Sathsarani R.V.P.L – Order & Payment Management
+03). Deployment Details
+Backend URL:https://t-shirt-customization-mobile-app.onrender.com
 A mobile-first customized t-shirt storefront and operations platform built with Expo React Native, Node.js, Express, and MongoDB.
 
 ## Overview
