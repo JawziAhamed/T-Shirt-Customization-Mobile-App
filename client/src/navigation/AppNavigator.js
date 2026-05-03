@@ -344,6 +344,7 @@ function CartStackNavigator() {
         },
         headerTintColor: colors.text,
         headerShadowVisible: false,
+        headerTopInsetEnabled: true,
         contentStyle: { backgroundColor: colors.background },
       }}
     >
@@ -383,6 +384,7 @@ function MainNavigator() {
         },
         headerTintColor: colors.text,
         headerShadowVisible: false,
+        headerTopInsetEnabled: true,
         contentStyle: { backgroundColor: colors.background },
       }}
     >

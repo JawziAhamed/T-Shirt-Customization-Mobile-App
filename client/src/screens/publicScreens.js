@@ -438,7 +438,8 @@ export function ProductsScreen() {
       <FlatList
         data={products}
         keyExtractor={(item) => item._id}
-        numColumns={1}
+        numColumns={2}
+        columnWrapperStyle={styles.productsRow}
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
           <View style={styles.productsHeader}>
@@ -473,7 +474,7 @@ export function ProductsScreen() {
           load();
         }}
         renderItem={({ item }) => (
-          <View style={{ marginBottom: spacing.md }}>
+          <View style={styles.productGridItem}>
             <ProductCard product={item} onPress={() => navigation.navigate('ProductDetails', { id: item._id })} />
           </View>
         )}
@@ -488,6 +489,7 @@ export function ProductDetailsScreen() {
   const route = useRoute();
   const { width } = useWindowDimensions();
   const addItem = useCartStore((state) => state.addItem);
+  const previewRef = useRef(null);
 
   const [product, setProduct] = useState(null);
   const [inventory, setInventory] = useState(null);
@@ -599,8 +601,11 @@ export function ProductDetailsScreen() {
     setPendingArtworkTarget('');
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
+
+    const snapshot = (await previewRef.current?.captureSnapshot?.()) || '';
+    const previewImage = snapshot || customArtworkUrl || fullDecal || logoDecal || product.imageUrl || '';
 
     addItem({
       productId: product._id,
@@ -610,14 +615,14 @@ export function ProductDetailsScreen() {
       color: selectedColor,
       unitPrice,
       baseProductImage: product.imageUrl || '',
-      customPreviewImage: customArtworkUrl || fullDecal || logoDecal || product.imageUrl || '',
+      customPreviewImage: previewImage,
       customization: {
         shirtColor,
         logoDecal,
         fullDecal,
         customArtworkUrl,
         baseProductImage: product.imageUrl || '',
-        customPreviewImage: customArtworkUrl || fullDecal || logoDecal || '',
+        customPreviewImage: previewImage,
         note,
       },
     });
@@ -643,10 +648,14 @@ export function ProductDetailsScreen() {
       <View style={styles.detailStack}>
         <AppCard elevated style={styles.previewCard}>
           <ShirtPreview
+            ref={previewRef}
             product={product}
             shirtColor={shirtColor}
             imageUri={customArtworkUrl || fullDecal || logoDecal || resolveProductImageUrl(product.imageUrl)}
             baseImage={product.imageUrl}
+            logoDecal={logoDecal}
+            fullDecal={fullDecal}
+            customArtworkUrl={customArtworkUrl}
             note={note}
             compact
           />
@@ -1424,6 +1433,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
     paddingBottom: spacing.xl,
+  },
+  productsRow: {
+    gap: spacing.md,
+  },
+  productGridItem: {
+    flex: 1,
+    marginBottom: spacing.md,
   },
   productsHeader: {
     paddingBottom: spacing.lg,

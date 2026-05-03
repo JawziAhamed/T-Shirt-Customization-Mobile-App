@@ -177,7 +177,7 @@ export function LoginScreen() {
               Forgot password?
             </AppText>
             <AppText tone="accent" onPress={() => navigation.navigate('Register')}>
-              Create account
+              Create Account
             </AppText>
           </View>
         </View>
@@ -403,5 +403,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: spacing.md,
+    flexWrap: 'wrap',
   },
 });

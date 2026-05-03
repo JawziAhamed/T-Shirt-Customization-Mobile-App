@@ -39,7 +39,7 @@ export function AppButton({
   const isPrimary = variant === 'primary';
   const isGhost = variant === 'ghost';
 
-  const content = (
+  return (
     <Pressable
       onPress={onPress}
       disabled={disabled || loading}
@@ -52,26 +52,31 @@ export function AppButton({
         style,
       ]}
     >
-      {loading ? (
-        <ActivityIndicator color={isGhost ? colors.text : colors.background} />
-      ) : (
-        <>
-          {icon ? <MaterialCommunityIcons name={icon} size={18} color={isGhost ? colors.text : colors.background} /> : null}
-          <Text style={[styles.buttonText, isGhost && styles.ghostText, textStyle]}>{title}</Text>
-        </>
-      )}
+      {isPrimary ? (
+        <LinearGradient
+          colors={['#58d5ff', '#7c9cff']}
+          pointerEvents="none"
+          style={styles.buttonGradient}
+        />
+      ) : null}
+      <View style={styles.buttonContent}>
+        {loading ? (
+          <ActivityIndicator color={isGhost ? colors.text : colors.background} />
+        ) : (
+          <>
+            {icon ? (
+              <MaterialCommunityIcons
+                name={icon}
+                size={18}
+                color={isGhost ? colors.text : colors.background}
+              />
+            ) : null}
+            <Text style={[styles.buttonText, isGhost && styles.ghostText, textStyle]}>{title}</Text>
+          </>
+        )}
+      </View>
     </Pressable>
   );
-
-  if (isPrimary) {
-    return (
-      <LinearGradient colors={['#58d5ff', '#7c9cff']} style={styles.buttonGradient}>
-        {content}
-      </LinearGradient>
-    );
-  }
-
-  return content;
 }
 
 export function AppInput({
@@ -243,23 +248,31 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   buttonGradient: {
+    ...StyleSheet.absoluteFillObject,
     borderRadius: radius.md,
   },
   button: {
+    width: '100%',
+    alignSelf: 'stretch',
     minHeight: 48,
     borderRadius: radius.md,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    flexDirection: 'row',
-    gap: spacing.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
   },
   primaryButton: {},
   ghostButton: {
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
+  },
+  buttonContent: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   disabledButton: {
     opacity: 0.55,
@@ -271,6 +284,7 @@ const styles = StyleSheet.create({
     color: colors.background,
     fontSize: 15,
     fontWeight: '800',
+    textAlign: 'center',
   },
   ghostText: {
     color: colors.text,

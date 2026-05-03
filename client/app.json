@@ -30,7 +30,8 @@
       "package": "com.anonymous.customtshirtstudio"
     },
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-asset"
     ]
   }
 }

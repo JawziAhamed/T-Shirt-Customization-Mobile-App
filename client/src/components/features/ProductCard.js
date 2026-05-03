@@ -17,7 +17,7 @@ export default function ProductCard({ product, onPress }) {
       <Image
         source={{ uri: imageSource || 'https://images.unsplash.com/photo-1618354691438-25bc04584c23?auto=format&fit=crop&w=1200&q=80' }}
         style={styles.image}
-        resizeMode="cover"
+        resizeMode="contain"
         onError={() => setImageSource('https://images.unsplash.com/photo-1618354691438-25bc04584c23?auto=format&fit=crop&w=1200&q=80')}
       />
       <View style={styles.body}>
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 180,
+    height: 150,
     backgroundColor: colors.surfaceSoft,
   },
   body: {

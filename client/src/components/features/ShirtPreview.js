@@ -1,17 +1,25 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { Image, ScrollView, StyleSheet, Text, View, useWindowDimensions, Platform } from 'react-native';
 
 import { colors, radius, spacing } from '../../theme';
 import { resolveProductImageUrl } from '../../utils/image';
 
-export default function ShirtPreview({
+let NativeShirtPreview = null;
+if (Platform.OS !== 'web') {
+  NativeShirtPreview = require('./NativeShirtPreview').default;
+}
+
+const WebShirtPreview = forwardRef(function WebShirtPreview({
   product,
   shirtColor = '#ffffff',
   imageUri,
   baseImage,
+  logoDecal,
+  fullDecal,
+  customArtworkUrl,
   note,
   compact = false,
-}) {
+}, ref) {
   const pagerRef = useRef(null);
   const { width } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -24,7 +32,17 @@ export default function ShirtPreview({
     [width, compact, pagerWidth]
   );
   const managementImage = resolveProductImageUrl(baseImage || product?.imageUrl || '');
-  const customImage = resolveProductImageUrl(imageUri || managementImage);
+  const customImage = resolveProductImageUrl(
+    customArtworkUrl || fullDecal || logoDecal || imageUri || managementImage
+  );
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      captureSnapshot: async () => customImage || managementImage || '',
+    }),
+    [customImage, managementImage]
+  );
 
   useEffect(() => {
     setActiveIndex(0);
@@ -99,7 +117,17 @@ export default function ShirtPreview({
       {note ? <Text style={styles.note}>{note}</Text> : null}
     </View>
   );
-}
+});
+
+const ShirtPreview = forwardRef(function ShirtPreview(props, ref) {
+  if (Platform.OS !== 'web') {
+    return <NativeShirtPreview ref={ref} {...props} />;
+  }
+
+  return <WebShirtPreview ref={ref} {...props} />;
+});
+
+export default ShirtPreview;
 
 const styles = StyleSheet.create({
   wrapper: {
