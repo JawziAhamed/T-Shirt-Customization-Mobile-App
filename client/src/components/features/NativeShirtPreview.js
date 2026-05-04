@@ -385,8 +385,8 @@ const NativeShirtPreview = forwardRef(function NativeShirtPreview(
         shirtGroup.rotation.x = -0.04;
         shirtGroup.rotation.y = 0;
         shirtGroup.scale.setScalar(compact ? 0.64 : 0.72);
-        shirtGroup.position.x = -0.6;
-        shirtGroup.position.y = -0.38;
+        shirtGroup.position.x = -0.75;
+        shirtGroup.position.y = -0.48;
 
         scene.add(shirtGroup);
 

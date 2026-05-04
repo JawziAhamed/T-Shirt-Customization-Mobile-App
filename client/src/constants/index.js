@@ -18,7 +18,7 @@ export const RETURN_STATUSES = ['pending', 'approved', 'rejected', 'picked_up', 
 
 export const COMPLAINT_STATUSES = ['open', 'in_progress', 'resolved', 'closed'];
 
-export const GIFT_CARD_STATUSES = ['active', 'used', 'expired', 'blocked'];
+export const GIFT_CARD_STATUSES = ['active', 'inactive', 'blocked'];
 
 export const PAYMENT_METHODS = [
   { label: 'Cash on Delivery', value: 'cod' },

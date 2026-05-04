@@ -32,7 +32,7 @@ export default function ProductCard({ product, onPress }) {
         </Text>
         <View style={styles.metaRow}>
           <View style={styles.pricePill}>
-            <MaterialCommunityIcons name="currency-usd" size={14} color={colors.primary} />
+            <MaterialCommunityIcons name="currency-lkr" size={14} color={colors.primary} />
             <Text style={styles.price}>{currency(product?.basePrice || 0)}</Text>
           </View>
           <Text style={styles.meta}>{(product?.colors || []).length || 0} colors</Text>

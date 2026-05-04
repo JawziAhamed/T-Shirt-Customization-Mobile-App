@@ -29,8 +29,7 @@ const buildGiftCardPayload = async ({ initial_balance, expiry_date, status, sess
 export const getGiftCards = asyncHandler(async (req, res) => {
   const { page, limit, skip } = getPagination(req.query);
   const filter = {};
-
-  if (req.query.status && ['active', 'inactive'].includes(String(req.query.status).toLowerCase())) {
+if (req.query.status && ['active', 'inactive', 'blocked'].includes(String(req.query.status).toLowerCase())) {
     filter.status = String(req.query.status).toLowerCase();
   }
 

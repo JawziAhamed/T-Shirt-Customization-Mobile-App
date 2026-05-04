@@ -30,6 +30,41 @@ const imageToFormFile = (asset, name = 'upload.jpg') => ({
 });
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const SIZE_PRESETS = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
+function BinarySelector({ label, value, onChange, leftLabel = 'True', rightLabel = 'False' }) {
+  return (
+    <View style={styles.booleanField}>
+      <Text style={styles.booleanLabel}>{label}</Text>
+      <View style={styles.booleanGroup}>
+        <Pressable
+          onPress={() => onChange('true')}
+          style={({ pressed }) => [
+            styles.booleanOption,
+            value === 'true' && styles.booleanOptionActive,
+            pressed && styles.booleanOptionPressed,
+          ]}
+        >
+          <Text style={[styles.booleanOptionText, value === 'true' && styles.booleanOptionTextActive]}>
+            {leftLabel}
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => onChange('false')}
+          style={({ pressed }) => [
+            styles.booleanOption,
+            value === 'false' && styles.booleanOptionActive,
+            pressed && styles.booleanOptionPressed,
+          ]}
+        >
+          <Text style={[styles.booleanOptionText, value === 'false' && styles.booleanOptionTextActive]}>
+            {rightLabel}
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
 
 const ADMIN_QUICK_ACTIONS = [
   { label: 'Add Product', subtitle: 'Create or edit catalog items', screen: 'ProductsAdmin', icon: 'tshirt-crew-outline' },
@@ -37,6 +72,23 @@ const ADMIN_QUICK_ACTIONS = [
   { label: 'View Reports', subtitle: 'Sales, returns, and stock PDF reports', screen: 'Reports', icon: 'file-chart-outline' },
   { label: 'Notifications', subtitle: 'Monitor alerts and updates', screen: 'Notifications', icon: 'bell-outline' },
 ];
+
+const ADMIN_TAB_SCREENS = new Set(['ProductsAdmin', 'OrdersAdmin']);
+
+const navigateToAdminScreen = (navigation, screen) => {
+  if (ADMIN_TAB_SCREENS.has(screen)) {
+    const parent = navigation.getParent?.();
+    if (parent) {
+      parent.navigate('Tabs', { screen });
+      return;
+    }
+
+    navigation.navigate('Tabs', { screen });
+    return;
+  }
+
+  navigation.navigate(screen);
+};
 
 function formatMonthLabel(entry, fallbackIndex) {
   if (!entry?._id) return MONTH_LABELS[fallbackIndex % 12];
@@ -278,7 +330,7 @@ export function DashboardScreen() {
           {ADMIN_QUICK_ACTIONS.map((action) => (
             <Pressable
               key={action.screen}
-              onPress={() => navigation.navigate(action.screen)}
+              onPress={() => navigateToAdminScreen(navigation, action.screen)}
               style={({ pressed }) => [styles.quickActionCard, pressed && styles.quickActionPressed]}
             >
               <View style={styles.quickActionIcon}>
@@ -390,6 +442,7 @@ export function UsersScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [selectedId, setSelectedId] = useState('');
+  const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -417,11 +470,13 @@ export function UsersScreen() {
 
   const resetForm = () => {
     setSelectedId('');
+    setRoleDropdownOpen(false);
     setForm({ name: '', email: '', password: '', role: 'customer', phone: '', address: '' });
   };
 
   const editUser = (user) => {
     setSelectedId(user._id);
+    setRoleDropdownOpen(false);
     setForm({
       name: user.name || '',
       email: user.email || '',
@@ -472,17 +527,49 @@ export function UsersScreen() {
         <AppInput label="Name" value={form.name} onChangeText={(value) => setForm((prev) => ({ ...prev, name: value }))} />
         <AppInput label="Email" value={form.email} onChangeText={(value) => setForm((prev) => ({ ...prev, email: value }))} style={{ marginTop: spacing.md }} />
         <AppInput label="Password" value={form.password} onChangeText={(value) => setForm((prev) => ({ ...prev, password: value }))} secureTextEntry style={{ marginTop: spacing.md }} />
-        <AppPicker
-          label="Role"
-          value={form.role}
-          onValueChange={(value) => setForm((prev) => ({ ...prev, role: value }))}
-          items={[
-            { label: 'Customer', value: 'customer' },
-            { label: 'Staff', value: 'staff' },
-            { label: 'Admin', value: 'admin' },
-          ]}
-          style={{ marginTop: spacing.md }}
-        />
+        <View style={styles.dropdownWrap}>
+          <Text style={styles.dropdownLabel}>Role</Text>
+          <Pressable
+            onPress={() => setRoleDropdownOpen((prev) => !prev)}
+            style={({ pressed }) => [styles.dropdownButton, pressed && styles.dropdownPressed]}
+          >
+            <Text style={styles.dropdownButtonText}>{titleCase(form.role || 'customer')}</Text>
+            <MaterialCommunityIcons
+              name={roleDropdownOpen ? 'chevron-up' : 'chevron-down'}
+              size={20}
+              color={colors.textMuted}
+            />
+          </Pressable>
+          {roleDropdownOpen ? (
+            <View style={styles.dropdownMenu}>
+              {[
+                { label: 'Customer', value: 'customer' },
+                { label: 'Staff', value: 'staff' },
+                { label: 'Admin', value: 'admin' },
+              ].map((option) => {
+                const selected = form.role === option.value;
+                return (
+                  <Pressable
+                    key={option.value}
+                    onPress={() => {
+                      setForm((prev) => ({ ...prev, role: option.value }));
+                      setRoleDropdownOpen(false);
+                    }}
+                    style={({ pressed }) => [
+                      styles.dropdownItem,
+                      selected && styles.dropdownItemSelected,
+                      pressed && styles.dropdownItemPressed,
+                    ]}
+                  >
+                    <Text style={[styles.dropdownItemText, selected && styles.dropdownItemTextSelected]}>
+                      {option.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : null}
+        </View>
         <AppInput label="Phone" value={form.phone} onChangeText={(value) => setForm((prev) => ({ ...prev, phone: value }))} style={{ marginTop: spacing.md }} />
         <AppInput label="Address" value={form.address} onChangeText={(value) => setForm((prev) => ({ ...prev, address: value }))} style={{ marginTop: spacing.md }} />
         <View style={styles.actionGrid}>
@@ -528,7 +615,7 @@ export function ProductsAdminScreen() {
     basePrice: '',
     category: 'custom-tshirt',
     colors: '',
-    sizes: '[]',
+    sizes: [],
     tags: '',
     stock: '0',
     lowStockThreshold: '10',
@@ -577,7 +664,7 @@ export function ProductsAdminScreen() {
       basePrice: '',
       category: 'custom-tshirt',
       colors: '',
-      sizes: '[]',
+      sizes: [],
       tags: '',
       stock: '0',
       lowStockThreshold: '10',
@@ -597,7 +684,14 @@ export function ProductsAdminScreen() {
       basePrice: String(product.basePrice || ''),
       category: product.category || 'custom-tshirt',
       colors: (product.colors || []).join(', '),
-      sizes: JSON.stringify(product.sizes || []),
+      sizes: Array.isArray(product.sizes)
+        ? product.sizes
+            .map((size) => ({
+              size: String(size.size || '').toUpperCase(),
+              priceModifier: Number(size.priceModifier || 0),
+            }))
+            .filter((size) => size.size)
+        : [],
       tags: (product.tags || []).join(', '),
       stock: String(product.inventory?.stock ?? 0),
       lowStockThreshold: String(product.inventory?.lowStockThreshold ?? 10),
@@ -624,6 +718,40 @@ export function ProductsAdminScreen() {
     setImageConfirmVisible(false);
   };
 
+  const toggleSize = (sizeLabel) => {
+    const normalizedSize = String(sizeLabel || '').trim().toUpperCase();
+    if (!normalizedSize) return;
+
+    setForm((prev) => {
+      const existing = prev.sizes || [];
+      const found = existing.find((item) => String(item.size || '').toUpperCase() === normalizedSize);
+
+      if (found) {
+        return {
+          ...prev,
+          sizes: existing.filter((item) => String(item.size || '').toUpperCase() !== normalizedSize),
+        };
+      }
+
+      return {
+        ...prev,
+        sizes: [...existing, { size: normalizedSize, priceModifier: 0 }],
+      };
+    });
+  };
+
+  const updateSizeModifier = (sizeLabel, value) => {
+    const normalizedSize = String(sizeLabel || '').trim().toUpperCase();
+    setForm((prev) => ({
+      ...prev,
+      sizes: (prev.sizes || []).map((item) =>
+        String(item.size || '').toUpperCase() === normalizedSize
+          ? { ...item, priceModifier: value }
+          : item
+      ),
+    }));
+  };
+
   const retakeSelectedImage = () => {
     setPendingImage(null);
     setImageConfirmVisible(false);
@@ -638,7 +766,10 @@ export function ProductsAdminScreen() {
       body.append('basePrice', form.basePrice);
       body.append('category', form.category);
       body.append('colors', JSON.stringify(form.colors.split(',').map((value) => value.trim()).filter(Boolean)));
-      body.append('sizes', form.sizes);
+      body.append('sizes', JSON.stringify((form.sizes || []).map((size) => ({
+        size: String(size.size || '').trim().toUpperCase(),
+        priceModifier: Number(size.priceModifier || 0),
+      })).filter((size) => size.size)));
       body.append('tags', JSON.stringify(form.tags.split(',').map((value) => value.trim()).filter(Boolean)));
       body.append('stock', form.stock);
       body.append('lowStockThreshold', form.lowStockThreshold);
@@ -685,26 +816,65 @@ export function ProductsAdminScreen() {
         <AppInput label="Base price" value={form.basePrice} onChangeText={(value) => setForm((prev) => ({ ...prev, basePrice: value }))} keyboardType="numeric" style={{ marginTop: spacing.md }} />
         <AppInput label="Category" value={form.category} onChangeText={(value) => setForm((prev) => ({ ...prev, category: value }))} style={{ marginTop: spacing.md }} />
         <AppInput label="Colors (comma separated)" value={form.colors} onChangeText={(value) => setForm((prev) => ({ ...prev, colors: value }))} style={{ marginTop: spacing.md }} />
-        <AppInput label="Sizes (JSON)" value={form.sizes} onChangeText={(value) => setForm((prev) => ({ ...prev, sizes: value }))} style={{ marginTop: spacing.md }} />
+        <View style={styles.sizeSection}>
+          <View style={styles.sizeHeaderRow}>
+            <Text style={styles.sizeSectionTitle}>Sizes</Text>
+            <Text style={styles.sizeSectionHint}>Tap to select sizes and adjust the price difference</Text>
+          </View>
+          <View style={styles.sizeChipGrid}>
+            {Array.from(new Set([...SIZE_PRESETS, ...(form.sizes || []).map((item) => String(item.size || '').toUpperCase())]))
+              .filter(Boolean)
+              .map((size) => {
+                const selected = (form.sizes || []).some((item) => String(item.size || '').toUpperCase() === size);
+                return (
+                  <Pressable
+                    key={size}
+                    onPress={() => toggleSize(size)}
+                    style={({ pressed }) => [
+                      styles.sizeChip,
+                      selected && styles.sizeChipSelected,
+                      pressed && styles.sizeChipPressed,
+                    ]}
+                  >
+                    <Text style={[styles.sizeChipText, selected && styles.sizeChipTextSelected]}>{size}</Text>
+                  </Pressable>
+                );
+              })}
+          </View>
+          {!!(form.sizes || []).length ? (
+            <View style={styles.sizeEditorList}>
+              {(form.sizes || []).map((item) => (
+                <View key={item.size} style={styles.sizeEditorRow}>
+                  <Text style={styles.sizeEditorLabel}>{item.size}</Text>
+                  <AppInput
+                    label="Price modifier"
+                    value={String(item.priceModifier ?? 0)}
+                    onChangeText={(value) => updateSizeModifier(item.size, value)}
+                    keyboardType="numeric"
+                    style={{ flex: 1 }}
+                  />
+                </View>
+              ))}
+            </View>
+          ) : null}
+        </View>
         <AppInput label="Tags (comma separated)" value={form.tags} onChangeText={(value) => setForm((prev) => ({ ...prev, tags: value }))} style={{ marginTop: spacing.md }} />
         <View style={styles.formRow}>
           <AppInput label="Stock" value={form.stock} onChangeText={(value) => setForm((prev) => ({ ...prev, stock: value }))} keyboardType="numeric" style={{ flex: 1 }} />
           <AppInput label="Low stock" value={form.lowStockThreshold} onChangeText={(value) => setForm((prev) => ({ ...prev, lowStockThreshold: value }))} keyboardType="numeric" style={{ flex: 1 }} />
         </View>
         <View style={styles.formRow}>
-          <AppPicker
+          <BinarySelector
             label="Active"
             value={form.isActive}
-            onValueChange={(value) => setForm((prev) => ({ ...prev, isActive: value }))}
-            items={[{ label: 'True', value: 'true' }, { label: 'False', value: 'false' }]}
-            style={{ flex: 1 }}
+            onChange={(value) => setForm((prev) => ({ ...prev, isActive: value }))}
           />
-          <AppPicker
+          <BinarySelector
             label="Custom art"
             value={form.customArtworkAllowed}
-            onValueChange={(value) => setForm((prev) => ({ ...prev, customArtworkAllowed: value }))}
-            items={[{ label: 'True', value: 'true' }, { label: 'False', value: 'false' }]}
-            style={{ flex: 1 }}
+            onChange={(value) => setForm((prev) => ({ ...prev, customArtworkAllowed: value }))}
+            leftLabel="Allowed"
+            rightLabel="Disabled"
           />
         </View>
         <View style={styles.actionGrid}>
@@ -868,7 +1038,13 @@ export function OrdersAdminScreen() {
             <Text style={styles.lineMeta}>{currency(order.total)}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.inlineActions}>
               {['confirmed', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => (
-                <AppButton key={status} title={titleCase(status)} variant="ghost" onPress={() => updateStatus(order._id, status)} />
+                <AppButton
+                  key={status}
+                  title={titleCase(status)}
+                  variant="ghost"
+                  onPress={() => updateStatus(order._id, status)}
+                  style={styles.orderStatusButton}
+                />
               ))}
             </ScrollView>
           </AppCard>
@@ -1060,7 +1236,7 @@ export function GiftCardsScreen() {
                 <Text style={styles.lineTitle}>{giftCard.code}</Text>
                 <AppBadge label={titleCase(giftCard.status)} tone="success" />
               </View>
-              <Text style={styles.lineMeta}>Balance: {currency(giftCard.current_balance)}</Text>
+              <Text style={styles.lineMeta}>Balance: {currency(giftCard.currentBalance ?? giftCard.current_balance ?? 0)}</Text>
               <View style={styles.actionGrid}>
                 <AppButton title="Active" variant="ghost" onPress={() => updateStatus(giftCard._id, 'active')} />
                 <AppButton title="Blocked" variant="ghost" onPress={() => updateStatus(giftCard._id, 'blocked')} />
@@ -1080,6 +1256,7 @@ export function PromosScreen() {
   const [loading, setLoading] = useState(true);
   const [broadcastText, setBroadcastText] = useState('');
   const [saving, setSaving] = useState(false);
+  const [discountTypeOpen, setDiscountTypeOpen] = useState(false);
   const [form, setForm] = useState({
     code: '',
     discountType: 'percent',
@@ -1117,6 +1294,7 @@ export function PromosScreen() {
         isActive: form.isActive === 'true',
       });
       setForm({ code: '', discountType: 'percent', discountValue: '', description: '', minOrderValue: '', isActive: 'true' });
+      setDiscountTypeOpen(false);
       await load();
     } catch (error) {
       Alert.alert('Create failed', error?.message || 'Please try again.');
@@ -1168,13 +1346,50 @@ export function PromosScreen() {
           New Promo
         </AppText>
         <AppInput label="Code" value={form.code} onChangeText={(value) => setForm((prev) => ({ ...prev, code: value }))} />
-        <AppPicker
-          label="Discount type"
-          value={form.discountType}
-          onValueChange={(value) => setForm((prev) => ({ ...prev, discountType: value }))}
-          items={[{ label: 'Percent', value: 'percent' }, { label: 'Fixed', value: 'fixed' }]}
-          style={{ marginTop: spacing.md }}
-        />
+        <View style={styles.dropdownWrap}>
+          <Text style={styles.dropdownLabel}>Discount type</Text>
+          <Pressable
+            onPress={() => setDiscountTypeOpen((prev) => !prev)}
+            style={({ pressed }) => [styles.dropdownButton, pressed && styles.dropdownPressed]}
+          >
+            <Text style={styles.dropdownButtonText}>
+              {form.discountType === 'fixed' ? 'Fixed' : 'Percent'}
+            </Text>
+            <MaterialCommunityIcons
+              name={discountTypeOpen ? 'chevron-up' : 'chevron-down'}
+              size={20}
+              color={colors.textMuted}
+            />
+          </Pressable>
+          {discountTypeOpen ? (
+            <View style={styles.dropdownMenu}>
+              {[
+                { label: 'Percent', value: 'percent' },
+                { label: 'Fixed', value: 'fixed' },
+              ].map((option) => {
+                const selected = form.discountType === option.value;
+                return (
+                  <Pressable
+                    key={option.value}
+                    onPress={() => {
+                      setForm((prev) => ({ ...prev, discountType: option.value }));
+                      setDiscountTypeOpen(false);
+                    }}
+                    style={({ pressed }) => [
+                      styles.dropdownItem,
+                      selected && styles.dropdownItemSelected,
+                      pressed && styles.dropdownItemPressed,
+                    ]}
+                  >
+                    <Text style={[styles.dropdownItemText, selected && styles.dropdownItemTextSelected]}>
+                      {option.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : null}
+        </View>
         <AppInput label="Discount value" value={form.discountValue} onChangeText={(value) => setForm((prev) => ({ ...prev, discountValue: value }))} keyboardType="numeric" style={{ marginTop: spacing.md }} />
         <AppInput label="Description" value={form.description} onChangeText={(value) => setForm((prev) => ({ ...prev, description: value }))} multiline style={{ marginTop: spacing.md }} />
         <AppInput label="Min order value" value={form.minOrderValue} onChangeText={(value) => setForm((prev) => ({ ...prev, minOrderValue: value }))} keyboardType="numeric" style={{ marginTop: spacing.md }} />
@@ -1355,6 +1570,64 @@ const styles = StyleSheet.create({
   },
   cardHeading: {
     marginBottom: spacing.sm,
+  },
+  dropdownWrap: {
+    marginTop: spacing.md,
+    gap: spacing.xs,
+  },
+  dropdownLabel: {
+    color: colors.textMuted,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  dropdownButton: {
+    minHeight: 48,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 13,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dropdownPressed: {
+    opacity: 0.92,
+  },
+  dropdownButtonText: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  dropdownMenu: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    backgroundColor: colors.backgroundAlt,
+    overflow: 'hidden',
+  },
+  dropdownItem: {
+    minHeight: 48,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
+    justifyContent: 'center',
+  },
+  dropdownItemSelected: {
+    backgroundColor: 'rgba(88, 213, 255, 0.12)',
+  },
+  dropdownItemPressed: {
+    opacity: 0.92,
+  },
+  dropdownItemText: {
+    color: colors.textMuted,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  dropdownItemTextSelected: {
+    color: colors.text,
   },
   dashboardIntro: {
     padding: spacing.lg,
@@ -1567,10 +1840,115 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontSize: 11,
   },
+  sizeSection: {
+    marginTop: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.lg,
+    backgroundColor: colors.backgroundAlt,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: spacing.md,
+  },
+  sizeHeaderRow: {
+    gap: 4,
+  },
+  sizeSectionTitle: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  sizeSectionHint: {
+    color: colors.textMuted,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  sizeChipGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  sizeChip: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    minWidth: 52,
+    alignItems: 'center',
+  },
+  sizeChipSelected: {
+    backgroundColor: 'rgba(88, 213, 255, 0.14)',
+    borderColor: colors.primary,
+  },
+  sizeChipPressed: {
+    opacity: 0.9,
+  },
+  sizeChipText: {
+    color: colors.textMuted,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  sizeChipTextSelected: {
+    color: colors.text,
+  },
+  sizeEditorList: {
+    gap: spacing.md,
+  },
+  sizeEditorRow: {
+    gap: spacing.sm,
+  },
+  sizeEditorLabel: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: '800',
+  },
   formRow: {
     flexDirection: 'row',
     gap: spacing.md,
     marginTop: spacing.md,
+  },
+  booleanField: {
+    flex: 1,
+    gap: spacing.xs,
+  },
+  booleanLabel: {
+    color: colors.textMuted,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  booleanGroup: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  booleanOption: {
+    flex: 1,
+    minHeight: 48,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  booleanOptionActive: {
+    borderColor: colors.primary,
+    backgroundColor: 'rgba(88, 213, 255, 0.12)',
+  },
+  booleanOptionPressed: {
+    opacity: 0.9,
+  },
+  booleanOptionText: {
+    color: colors.textMuted,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  booleanOptionTextActive: {
+    color: colors.text,
   },
   productRow: {
     flexDirection: 'row',
@@ -1586,6 +1964,12 @@ const styles = StyleSheet.create({
   inlineActions: {
     gap: spacing.sm,
     paddingTop: spacing.md,
+  },
+  orderStatusButton: {
+    width: 'auto',
+    minWidth: 112,
+    alignSelf: 'flex-start',
+    paddingHorizontal: spacing.md,
   },
   chartCard: {
     padding: spacing.lg,
@@ -1769,7 +2153,6 @@ const styles = StyleSheet.create({
   modalActions: {
     flexDirection: 'row',
     gap: spacing.md,
-    justifyContent: 'space-between',
   },
 });
 

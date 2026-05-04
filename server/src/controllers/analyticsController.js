@@ -29,7 +29,7 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('en-US', {
 const currency = (value) =>
   new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'LKR',
     minimumFractionDigits: 2,
   }).format(Number(value || 0));
 
